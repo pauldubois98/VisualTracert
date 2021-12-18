@@ -1,5 +1,6 @@
 import tkinter as tk
-
+import requests
+import json
 
 
 def get_ips(filename):
@@ -20,6 +21,14 @@ def get_ips(filename):
         l = ls[i]
     f.close()
     return ips
+
+def get_coord(ip):
+    r = requests.get('http://ip-api.com/json/'+ip)
+    js = json.loads(r.text)
+    try:
+        return (js['lat'], js['lon'])
+    except:
+        return None
 
 
 
