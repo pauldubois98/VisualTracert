@@ -2,6 +2,7 @@ import tkinter as tk
 import requests
 import json
 import numpy as np
+import plotly.express as px
 
 def get_ips(filename):
     f = open(filename, 'r')
@@ -40,6 +41,14 @@ def get_coords(ips):
     np_coords = np.array(coords)
     return np_coords
 
+def plot(np_coords):
+    # lats = np.append(lats, y)
+    # lons = np.append(lons, x)
+    lats = np_coords[:,0]
+    lons = np_coords[:,1]
+    # fig = px.line_geo(lat=lats, lon=lons)
+    fig = px.line_geo(lat=lats, lon=lons, projection="orthographic")
+    fig.show()
 
 root = tk.Tk()
 root.title("Visual tracert")
