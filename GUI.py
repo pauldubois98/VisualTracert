@@ -50,6 +50,11 @@ def plot(np_coords):
     fig = px.line_geo(lat=lats, lon=lons, projection="orthographic")
     fig.show()
 
+def tracert():
+    global adress_entry
+    print(adress_entry.get())
+    TracertThread(adress_entry.get()).start()
+
 class TracertThread(threading.Thread):
     def __init__(self, adress):
         threading.Thread.__init__(self)
