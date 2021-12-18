@@ -1,7 +1,7 @@
 import tkinter as tk
 import requests
 import json
-
+import numpy as np
 
 def get_ips(filename):
     f = open(filename, 'r')
@@ -30,6 +30,15 @@ def get_coord(ip):
     except:
         return None
 
+def get_coords(ips):
+    coords = []
+    for ip in ips:
+        coord = get_coord(ip)
+        if not coord is None:
+            coords.append(coord)
+            print(ip, coord)
+    np_coords = np.array(coords)
+    return np_coords
 
 
 root = tk.Tk()
