@@ -52,8 +52,8 @@ def plot(np_coords):
 
 def tracert():
     global adress_entry
-    print(adress_entry.get())
     TracertThread(adress_entry.get()).start()
+    adress_entry.delete(0, tk.END)
 
 class TracertThread(threading.Thread):
     def __init__(self, adress):
@@ -76,10 +76,7 @@ root.title("Visual tracert")
 adress_entry = tk.Entry(root, width=60, justify='center')
 adress_entry.pack(pady=2)
 
-tracert_button = tk.Button(root, text='tracert')
+tracert_button = tk.Button(root, text='tracert', command=tracert)
 tracert_button.pack()
 
-
 root.mainloop()
-
-
