@@ -3,6 +3,8 @@ import requests
 import json
 import numpy as np
 import plotly.express as px
+import threading
+import os
 
 def get_ips(filename):
     f = open(filename, 'r')
@@ -42,13 +44,27 @@ def get_coords(ips):
     return np_coords
 
 def plot(np_coords):
-    # lats = np.append(lats, y)
-    # lons = np.append(lons, x)
     lats = np_coords[:,0]
     lons = np_coords[:,1]
     # fig = px.line_geo(lat=lats, lon=lons)
     fig = px.line_geo(lat=lats, lon=lons, projection="orthographic")
     fig.show()
+
+class TracertThread(threading.Thread):
+    def __init__(self, adress):
+        threading.Thread.__init__(self)
+        self.adress = adress
+
+    def run(self):
+        global image_label
+        cmd = 'tracert '+self.adress+' > data/d_'+str(threading.get_native_id())+'.txt'
+        print(cmd)
+        os.system(cmd)
+        print('root determined')
+        filename = 'data/d_'+str(threading.get_native_id())+'.txt'
+        ips = get_ips(filename)
+        np_coords = get_coords(ips)
+        plot(np_coords)
 
 root = tk.Tk()
 root.title("Visual tracert")
