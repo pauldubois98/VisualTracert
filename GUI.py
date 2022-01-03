@@ -5,6 +5,8 @@ import numpy as np
 import plotly.express as px
 import threading
 import os
+import time
+from PIL import ImageTk,Image  
 
 
 def finished(filename):
@@ -57,13 +59,19 @@ def get_coords(ips):
     np_coords = np.array(coords)
     return np_coords, full_coords
 
-def plot(np_coords):
+def plot_img(np_coords):
+    lats = np_coords[:,0]
+    lons = np_coords[:,1]
+    fig = px.line_geo(lat=lats, lon=lons)
+    fig.write_image("fig.png", scale=1)
+    # fig.write_image("fig.png", scale=2)
+
+def plot_web(np_coords):
     lats = np_coords[:,0]
     lons = np_coords[:,1]
     # fig = px.line_geo(lat=lats, lon=lons)
     fig = px.line_geo(lat=lats, lon=lons, projection="orthographic")
     fig.show()
-    fig.write_image("fig.png")
 
 def tracert():
     global root, adress_entry, thread, filename
@@ -78,16 +86,15 @@ def tracert():
         root.after(1000, update)
 
 def update():
-    global root, ip_list, thread, filename, ips, np_coords, full_coords
+    global root, ip_list, map_show, thread, filename, ips, np_coords, full_coords, img
     new_ips = get_ips(filename)
     if len(new_ips)>len(ips):
+        ips = new_ips
         ip_list.config(text='\n'.join(ips)+'\n...')
     if finished(filename):
         np_coords, full_coords = get_coords(ips)
         txt = ""
         i = 0
-        print(ips)
-        print(np_coords)
         while i<len(ips):
             txt += ips[i]
             txt += ' - '
@@ -95,7 +102,10 @@ def update():
             txt += '\n'
             i += 1
         ip_list.config(text=txt[:-1])
-        plot(np_coords)
+        plot_img(np_coords)
+        time.sleep(1)
+        img = ImageTk.PhotoImage(Image.open("fig.png"))      
+        map_show.create_image(-75,-100, anchor=tk.NW, image=img)
     else:
         root.after(1000, update)
 
@@ -114,21 +124,30 @@ class TracertThread(threading.Thread):
         print('root determined')
         # ips = get_ips(self.filename)
         # np_coords, full_coords = get_coords(ips)
-        # plot(np_coords)
+        # plot_web(np_coords)
 
 
 thread = None
 filename = None
-ips = None
-np_coords = None
-full_coords = None
+ips = []
+np_coords = np.array([[1,1]])
+full_coords = []
+
 root = tk.Tk()
 root.title("Visual tracert")
+
 adress_entry = tk.Entry(root, width=60, justify='center')
 adress_entry.pack(pady=2)
+
 ip_list = tk.Label(root, text="")
 ip_list.pack()
+
 tracert_button = tk.Button(root, text='tracert', command=tracert)
 tracert_button.pack()
+
+map_show = tk.Canvas(root, width = 545, height = 275)
+map_show.pack()
+img = ImageTk.PhotoImage(Image.open("fig0.png"))  
+map_show.create_image(-75,-100, anchor=tk.NW, image=img)
 
 root.mainloop()
