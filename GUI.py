@@ -80,10 +80,22 @@ def tracert():
         adress_entry.delete(0, tk.END)
         root.after(1000, update)
     else:
-        filename="tracert.txt"
-        thread = TracertThread(adress_entry.get(), filename).start()
-        adress_entry.delete(0, tk.END)
-        root.after(1000, update)
+        website = adress_entry.get()
+        try:
+            response = requests.get("http://"+website)
+        except:
+            adress_entry.config(bg='red')
+        else:
+            if response.status_code == 200:
+                adress_entry.config(bg='white')
+                filename="tracert.txt"
+                thread = TracertThread(website, filename).start()
+                adress_entry.delete(0, tk.END)
+                root.after(1000, update)
+            else:
+                adress_entry.config(bg='red')
+            
+        
 
 def update():
     global root, ip_list, map_show, thread, filename, ips, np_coords, full_coords, img
