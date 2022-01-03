@@ -74,8 +74,9 @@ def plot_web(np_coords):
     fig.show()
 
 def tracert():
-    global root, adress_entry, thread, filename
+    global root, adress_entry, thread, filename, ips, np_coords, full_coords
     if adress_entry.get()=='_':
+        #quicker: use old tracert data
         filename="tracert.txt"
         adress_entry.delete(0, tk.END)
         root.after(1000, update)
@@ -87,6 +88,17 @@ def tracert():
             adress_entry.config(bg='red')
         else:
             if response.status_code == 200:
+                #kill old thread if needed
+                if thread is None:
+                    pass
+                else:
+                    thread._stop()
+                    thread = None
+                    filename = None
+                    ips = []
+                    np_coords = np.array([[1,1]])
+                    full_coords = []
+                #do the job
                 adress_entry.config(bg='white')
                 filename="tracert.txt"
                 thread = TracertThread(website, filename).start()
