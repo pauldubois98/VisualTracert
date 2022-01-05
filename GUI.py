@@ -69,7 +69,7 @@ def plot_img(np_coords, finished=True, color=None):
     for i in range(n):
         if color is None:
             a = 2*np.pi*i/n
-            r = int(255*((np.cos(a)+1)/2))
+            r = int(255*((np.cos(a+0*np.pi/3)+1)/2))
             g = int(255*((np.cos(a+2*np.pi/3)+1)/2))
             b = int(255*((np.cos(a+4*np.pi/3)+1)/2))
             c = 'rgb('+str(r)+','+str(g)+','+str(b)+')'
@@ -88,7 +88,7 @@ def plot_img(np_coords, finished=True, color=None):
 
 
 def tracert():
-    global root, tracert_button, adress_entry, thread, filename, ips, np_coords, full_coords, coords
+    global root, tracert_button, adress_entry, map_show, img, thread, filename, ips, np_coords, full_coords, coords, website
     if adress_entry.get()=='_':
         #quicker: use old tracert data
         filename="tracert.txt"
@@ -108,26 +108,25 @@ def tracert():
                 else:
                     thread._stop()
                     thread = None
-                    filename = None
-                    ips = []
-                    coords = []
-                    np_coords = np.array([[1,1]])
-                    full_coords = []
                 #do the job
                 adress_entry.config(bg='white')
                 filename="tracert.txt"
+                ips = []
+                coords = []
+                np_coords = np.array([[1,1]])
+                full_coords = []
                 thread = TracertThread(website, filename).start()
                 adress_entry.delete(0, tk.END)
-                ip_list.config(text='...')
+                ip_list.config(text="tracert "+website+':\n...')
                 tracert_button.config(state='disable')
+                img = ImageTk.PhotoImage(Image.open("fig0.png"))      
+                map_show.create_image(-76,-128, anchor=tk.NW, image=img)
                 root.after(1000, update)
             else:
                 adress_entry.config(bg='red')
-            
-        
 
 def update():
-    global root, tracert_button, ip_list, map_show, thread, filename, ips, coords, np_coords, full_coords, img
+    global root, tracert_button, ip_list, map_show, thread, filename, ips, coords, np_coords, full_coords, img, website
     new_ips = get_ips(filename)
     if len(new_ips)>len(ips):
         i = len(ips)
@@ -141,7 +140,7 @@ def update():
         np_coords = np.array(coords)
         ips = new_ips
 
-        txt = ""
+        txt = "tracert "+website+':\n'
         i = 0
         while i<len(ips):
             txt += ips[i]
@@ -156,7 +155,7 @@ def update():
         map_show.create_image(-76,-128, anchor=tk.NW, image=img)
     if finished(filename):
         np_coords, full_coords = get_coords(ips)
-        txt = ""
+        txt = "tracert "+website+':\n'
         i = 0
         while i<len(ips):
             txt += ips[i]
@@ -197,6 +196,7 @@ ips = []
 coords = []
 np_coords = np.array([[1,1]])
 full_coords = []
+website = ""
 
 root = tk.Tk()
 root.title("Visual tracert")
