@@ -75,7 +75,7 @@ def plot_web(np_coords):
     fig.show()
 
 def tracert():
-    global root, adress_entry, thread, filename, ips, np_coords, full_coords
+    global root, tracert_button, adress_entry, thread, filename, ips, np_coords, full_coords
     if adress_entry.get()=='_':
         #quicker: use old tracert data
         filename="tracert.txt"
@@ -104,6 +104,8 @@ def tracert():
                 filename="tracert.txt"
                 thread = TracertThread(website, filename).start()
                 adress_entry.delete(0, tk.END)
+                ip_list.config(text='...')
+                tracert_button.config(state='disable')
                 root.after(1000, update)
             else:
                 adress_entry.config(bg='red')
@@ -111,7 +113,7 @@ def tracert():
         
 
 def update():
-    global root, ip_list, map_show, thread, filename, ips, coords, np_coords, full_coords, img
+    global root, tracert_button, ip_list, map_show, thread, filename, ips, coords, np_coords, full_coords, img
     new_ips = get_ips(filename)
     if len(new_ips)>len(ips):
         i = len(ips)
@@ -153,6 +155,7 @@ def update():
         time.sleep(1)
         img = ImageTk.PhotoImage(Image.open("fig.png"))      
         map_show.create_image(-75,-100, anchor=tk.NW, image=img)
+        tracert_button.config(state='normal')
     else:
         root.after(1000, update)
 
