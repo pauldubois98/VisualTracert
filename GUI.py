@@ -6,7 +6,8 @@ import plotly.express as px
 import threading
 import os
 import time
-from PIL import ImageTk,Image  
+from PIL import ImageTk,Image
+from requests.sessions import ContentDecodingError  
 
 
 def finished(filename):
@@ -110,11 +111,33 @@ def tracert():
         
 
 def update():
-    global root, ip_list, map_show, thread, filename, ips, np_coords, full_coords, img
+    global root, ip_list, map_show, thread, filename, ips, coords, np_coords, full_coords, img
     new_ips = get_ips(filename)
     if len(new_ips)>len(ips):
+        i = len(ips)
+        while i<len(new_ips):
+            ip = new_ips[i]
+            coord = get_coord(ip)
+            full_coords.append(coord)
+            if not coord is None:
+                coords.append(coord)
+            i += 1
+        np_coords = np.array(coords)
         ips = new_ips
-        ip_list.config(text='\n'.join(ips)+'\n...')
+
+        txt = ""
+        i = 0
+        while i<len(ips):
+            txt += ips[i]
+            txt += ' - '
+            txt += str(full_coords[i])
+            txt += '\n'
+            i += 1
+        ip_list.config(text=txt+'...')
+        plot_img(np_coords)
+        time.sleep(0.1)
+        img = ImageTk.PhotoImage(Image.open("fig.png"))      
+        map_show.create_image(-75,-100, anchor=tk.NW, image=img)
     if finished(filename):
         np_coords, full_coords = get_coords(ips)
         txt = ""
@@ -154,6 +177,7 @@ class TracertThread(threading.Thread):
 thread = None
 filename = None
 ips = []
+coords = []
 np_coords = np.array([[1,1]])
 full_coords = []
 
