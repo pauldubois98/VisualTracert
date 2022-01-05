@@ -3,6 +3,7 @@ import requests
 import json
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 import threading
 import os
 import time
@@ -60,22 +61,34 @@ def get_coords(ips):
     np_coords = np.array(coords)
     return np_coords, full_coords
 
-def plot_img(np_coords):
+def plot_img(np_coords, finished=True, color=None):
     lats = np_coords[:,0]
     lons = np_coords[:,1]
-    fig = px.line_geo(lat=lats, lon=lons)
+    n = len(lats)-1
+    fig = go.Figure()
+    for i in range(n):
+        if color is None:
+            a = 2*np.pi*i/n
+            r = int(255*((np.cos(a)+1)/2))
+            g = int(255*((np.cos(a+2*np.pi/3)+1)/2))
+            b = int(255*((np.cos(a+4*np.pi/3)+1)/2))
+            c = 'rgb('+str(r)+','+str(g)+','+str(b)+')'
+        else:
+            c = color
+        fig.add_trace(go.Scattergeo(lat=[lats[i], lats[i+1]], lon=[lons[i], lons[i+1]], \
+                                    mode = 'lines', line = dict(width = 2, color = c) ))
+    fig.add_trace(go.Scattergeo(lat=[lats[0]],lon=[lons[0]]))
+    if finished:
+        fig.add_trace(go.Scattergeo(lat=[lats[-1]],lon=[lons[-1]]))
     fig.write_image("fig.png", scale=1)
+    ### for higher resolution:
     # fig.write_image("fig.png", scale=2)
+    ### for web display:
+    # fig.show()
 
-def plot_web(np_coords):
-    lats = np_coords[:,0]
-    lons = np_coords[:,1]
-    # fig = px.line_geo(lat=lats, lon=lons)
-    fig = px.line_geo(lat=lats, lon=lons, projection="orthographic")
-    fig.show()
 
 def tracert():
-    global root, tracert_button, adress_entry, thread, filename, ips, np_coords, full_coords
+    global root, tracert_button, adress_entry, thread, filename, ips, np_coords, full_coords, coords
     if adress_entry.get()=='_':
         #quicker: use old tracert data
         filename="tracert.txt"
@@ -97,6 +110,7 @@ def tracert():
                     thread = None
                     filename = None
                     ips = []
+                    coords = []
                     np_coords = np.array([[1,1]])
                     full_coords = []
                 #do the job
@@ -136,10 +150,10 @@ def update():
             txt += '\n'
             i += 1
         ip_list.config(text=txt+'...')
-        plot_img(np_coords)
+        plot_img(np_coords, False)
         time.sleep(0.1)
         img = ImageTk.PhotoImage(Image.open("fig.png"))      
-        map_show.create_image(-75,-100, anchor=tk.NW, image=img)
+        map_show.create_image(-76,-128, anchor=tk.NW, image=img)
     if finished(filename):
         np_coords, full_coords = get_coords(ips)
         txt = ""
@@ -154,7 +168,7 @@ def update():
         plot_img(np_coords)
         time.sleep(1)
         img = ImageTk.PhotoImage(Image.open("fig.png"))      
-        map_show.create_image(-75,-100, anchor=tk.NW, image=img)
+        map_show.create_image(-76,-128, anchor=tk.NW, image=img)
         tracert_button.config(state='normal')
     else:
         root.after(1000, update)
@@ -196,9 +210,9 @@ ip_list.pack()
 tracert_button = tk.Button(root, text='tracert', command=tracert)
 tracert_button.pack()
 
-map_show = tk.Canvas(root, width = 545, height = 275)
+map_show = tk.Canvas(root, width = 513, height = 261)
 map_show.pack()
 img = ImageTk.PhotoImage(Image.open("fig0.png"))  
-map_show.create_image(-75,-100, anchor=tk.NW, image=img)
+map_show.create_image(-76,-128, anchor=tk.NW, image=img)
 
 root.mainloop()
