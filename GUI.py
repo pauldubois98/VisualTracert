@@ -64,19 +64,19 @@ def get_coords(ips):
 def plot_img(np_coords, finished=True, color=None):
     lats = np_coords[:,0]
     lons = np_coords[:,1]
-    n = len(lats)-1
     fig = go.Figure()
-    for i in range(n):
-        if color is None:
-            a = 2*np.pi*i/n
-            r = int(255*((np.cos(a+0*np.pi/3)+1)/2))
-            g = int(255*((np.cos(a+2*np.pi/3)+1)/2))
-            b = int(255*((np.cos(a+4*np.pi/3)+1)/2))
-            c = 'rgb('+str(r)+','+str(g)+','+str(b)+')'
-        else:
-            c = color
-        fig.add_trace(go.Scattergeo(lat=[lats[i], lats[i+1]], lon=[lons[i], lons[i+1]], \
-                                    mode = 'lines', line = dict(width = 2, color = c) ))
+    if len(lats)>1:
+        for i in range(len(lats)-1):
+            if color is None:
+                a = 2*np.pi*i/12
+                r = int(255*((np.cos(a+0*np.pi/3)+1)/2))
+                g = int(255*((np.cos(a+2*np.pi/3)+1)/2))
+                b = int(255*((np.cos(a+4*np.pi/3)+1)/2))
+                c = 'rgb('+str(r)+','+str(g)+','+str(b)+')'
+            else:
+                c = color
+            fig.add_trace(go.Scattergeo(lat=[lats[i], lats[i+1]], lon=[lons[i], lons[i+1]], \
+                                        mode = 'lines', line = dict(width = 2, color = c) ))
     fig.add_trace(go.Scattergeo(lat=[lats[0]],lon=[lons[0]]))
     if finished:
         fig.add_trace(go.Scattergeo(lat=[lats[-1]],lon=[lons[-1]]))
